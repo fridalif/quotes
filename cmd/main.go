@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"quotes/internal/handlers"
 	"quotes/internal/middlewares"
 	"quotes/internal/repository"
@@ -21,4 +22,6 @@ func main() {
 	r.HandleFunc("/quotes/random", middlewares.RecoverMiddleware(quotesHandler.GetRandomQuote)).Methods("GET")
 	r.HandleFunc("/quotes", middlewares.RecoverMiddleware(quotesHandler.InsertQuote)).Methods("POST")
 	r.HandleFunc("/quotes/{id}", middlewares.RecoverMiddleware(quotesHandler.DeleteQuote)).Methods("DELETE")
+
+	http.ListenAndServe("localhost:8080", r)
 }
