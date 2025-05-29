@@ -55,12 +55,16 @@ func (r *QuotesRepo) GetRandomQuote() model.Quote {
 func (r *QuotesRepo) InsertQuote(quote model.Quote) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	maxId := uint(0)
 	for _, q := range r.quotes {
+		if q.Id > maxId {
+			maxId = q.Id
+		}
 		if q.Text == quote.Text && q.Author == quote.Author {
 			return errors.ErrQuoteAlreadyExists
 		}
 	}
-	quote.Id = uint(len(r.quotes) + 1)
+	quote.Id = maxId + 1
 	r.quotes = append(r.quotes, quote)
 	return nil
 }
