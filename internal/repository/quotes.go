@@ -23,9 +23,9 @@ type QuotesRepo struct {
 	mu     *sync.RWMutex
 }
 
-func NewQuotesRepo(quotes []model.Quote) QuotesRepoI {
+func NewQuotesRepo() QuotesRepoI {
 	return &QuotesRepo{
-		quotes: quotes,
+		quotes: []model.Quote{},
 		mu:     &sync.RWMutex{},
 	}
 }

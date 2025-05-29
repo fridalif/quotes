@@ -13,7 +13,6 @@ import (
 
 type QuotesHandlerI interface {
 	GetQuotes(w http.ResponseWriter, r *http.Request)
-	GetQuotesByAuthor(w http.ResponseWriter, r *http.Request)
 	GetRandomQuote(w http.ResponseWriter, r *http.Request)
 	InsertQuote(w http.ResponseWriter, r *http.Request)
 	DeleteQuote(w http.ResponseWriter, r *http.Request)
@@ -34,7 +33,14 @@ func (handler *QuotesHandler) GetQuotes(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	quotes := handler.service.GetQuotes()
+	author := r.URL.Query().Get("author")
+
+	var quotes []model.Quote
+	if author != "" {
+		quotes = handler.service.GetQuotesByAuthor(author)
+	} else {
+		quotes = handler.service.GetQuotes()
+	}
 	err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"body": map[string]interface{}{
 			"quotes": quotes,
@@ -51,30 +57,6 @@ func (handler *QuotesHandler) GetQuotes(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-}
-
-func (handler *QuotesHandler) GetQuotesByAuthor(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-	author := r.URL.Query().Get("author")
-	quotes := handler.service.GetQuotesByAuthor(author)
-	err := json.NewEncoder(w).Encode(map[string]interface{}{
-		"body": map[string]interface{}{
-			"quotes": quotes,
-		},
-		"error": nil,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"body":  map[string][]string{},
-			"error": "Что-то пошло не так",
-		})
-		log.Println(err)
-		return
-	}
 }
 
 func (handler *QuotesHandler) GetRandomQuote(w http.ResponseWriter, r *http.Request) {
